@@ -1,6 +1,8 @@
 # Expense Tracker
 
 A full-stack expense tracking application built with Node.js, Express, React, and TypeScript.
+<img width="1893" height="976" alt="image" src="https://github.com/user-attachments/assets/ec3e0afb-81c8-4cf2-8b63-107fcfc8cfb9" />
+<img width="1859" height="968" alt="image" src="https://github.com/user-attachments/assets/a286eeaa-7511-4198-b413-6042cefe19c1" />
 
 ## Features
 
@@ -14,6 +16,7 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 - ✅ **Budget summary dashboard** with category breakdowns
 - ✅ **Automatic budget alerts** displayed on expenses tab
 - ✅ **Responsive budget interface** optimized for mobile and desktop
+<img width="718" height="764" alt="image" src="https://github.com/user-attachments/assets/e815f72d-786c-4363-9918-9490308a7f08" />
 
 ### 🤖 AI Chat Assistant
 - ✅ **Enhanced budget management** - "Create a $500 food budget for this month"
@@ -26,6 +29,7 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 - ✅ **Currency conversion** through chat commands
 - ✅ **Voice-like interactions** - no complex forms or navigation needed
 - ✅ **Budget warnings and summaries** through AI conversation
+<img width="379" height="531" alt="image" src="https://github.com/user-attachments/assets/f874f1f2-7f18-4b17-a848-0d57bab91a08" />
 
 ### Backend (Express + TypeScript)
 - ✅ RESTful API for expense CRUD operations
@@ -578,4 +582,5 @@ See `CLAUDE_SETUP.md` for detailed setup instructions.
 - **Charts**: Chart.js with react-chartjs-2
 - **Development**: ts-node-dev, ESLint, Concurrently
 - **Styling**: CSS3 with CSS Grid and Flexbox
+
 - **HTTP Client**: Axios for API communication
