@@ -18,7 +18,7 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 - ✅ **Multi-currency support** with automatic conversion and analytics
 - ✅ **AI chatbot integration** - create, update, and track budgets via natural language
 - ✅ **Budget dashboard** with utilization analytics and responsive mobile interface
-<img width="718" height="764" alt="image" src="https://github.com/user-attachments/assets/e815f72d-786c-4363-9918-9490308a7f08" />
+<img width="1870" height="989" alt="image" src="https://github.com/user-attachments/assets/aac46fa7-fbd9-468f-9715-0408e5633c24" />
 
 ### 📊 Analytics
 - ✅ **Interactive charts** powered by Chart.js with spending by category and monthly trends
@@ -41,7 +41,7 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 - ✅ **Mobile-responsive chat UI** with floating chat button and voice-like interactions
 - ✅ **AI-powered analytics** - get spending summaries, budget warnings, and currency conversion
 - ✅ **Seamless integration** - no complex forms needed, just natural conversation
-<img width="379" height="531" alt="image" src="https://github.com/user-attachments/assets/f874f1f2-7f18-4b17-a848-0d57bab91a08" />
+<img width="1875" height="972" alt="image" src="https://github.com/user-attachments/assets/9cb04347-14c2-4eec-97fb-f3c588d86533" />
 
 ## Project Structure
 
@@ -564,3 +564,4 @@ See `CLAUDE_SETUP.md` for detailed setup instructions.
 - **Styling**: CSS3 with CSS Grid and Flexbox
 
 - **HTTP Client**: Axios for API communication
+
