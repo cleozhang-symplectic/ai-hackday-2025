@@ -17,6 +17,11 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 - ✅ Responsive design with CSS Grid
 - ✅ Form validation and error handling
 - ✅ Real-time expense management (add, edit, delete)
+- ✅ Advanced filtering system (amount, category, date, tags)
+- ✅ Comprehensive tagging system with custom colors
+- ✅ Analytics dashboard with interactive charts
+- ✅ CSV export functionality
+- ✅ Tab-based navigation (Expenses/Analytics)
 
 ## Project Structure
 
@@ -104,7 +109,19 @@ interface Expense {
   category: string;
   date: string;
   description?: string;
+  tags?: Tag[];
 }
+```
+
+### Tag
+```typescript
+interface Tag {
+  id: string;
+  name: string;
+  color: TagColor;
+}
+
+type TagColor = 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'pink' | 'indigo' | 'gray';
 ```
 
 ## Development
@@ -121,20 +138,55 @@ The frontend uses Vite for fast development builds and hot module replacement.
 2. **Frontend**: Add new components in `frontend/src/components/`
 3. **Shared Types**: Update type definitions in both `backend/src/types/` and `frontend/src/types/`
 
+## Key Features
+
+### 🏷️ Advanced Tagging System
+- Create custom tags with 8 color options
+- Tag-based filtering and search
+- Visual tag distribution analytics
+- Collapsible tag selector in forms
+
+### 📊 Analytics Dashboard
+- Interactive charts powered by Chart.js
+- Spending by category (bar chart)
+- Monthly spending trends (line chart)
+- Tag distribution (doughnut chart)
+- Key statistics overview
+
+### 🔍 Advanced Filtering
+- Filter by amount ranges (under $50, $50-$100, over $100)
+- Category-based filtering
+- Date range filtering
+- Tag-based filtering
+- Combined filter support
+
+### 📥 Data Export
+- Export all expense data to CSV format
+- Automatic filename with current date
+- Includes all fields: date, description, amount, category, tags
+
+### 📱 Responsive Design
+- Mobile-first approach
+- Collapsible navigation on mobile
+- Optimized chart displays
+- Touch-friendly interface
+
 ## Future Enhancements
 
 - [ ] Database integration (PostgreSQL/MongoDB)
 - [ ] User authentication and authorization
-- [ ] Data visualization charts
-- [ ] Export functionality (PDF/CSV)
-- [ ] Expense categories management
 - [ ] Budget tracking and alerts
-- [ ] Mobile responsive improvements
+- [ ] PDF export functionality
+- [ ] Expense receipt uploads
+- [ ] Recurring expense management
 - [ ] Dark mode support
+- [ ] Multi-currency support
 
 ## Technology Stack
 
 - **Backend**: Node.js, Express.js, TypeScript
 - **Frontend**: React, TypeScript, Vite
+- **Charts**: Chart.js with react-chartjs-2
 - **Development**: ts-node-dev, ESLint, Concurrently
 - **Styling**: CSS3 with CSS Grid and Flexbox
+- **HTTP Client**: Axios for API communication

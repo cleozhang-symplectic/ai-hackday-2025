@@ -125,8 +125,6 @@ export const ExpenseList = ({ onExpenseSelect, refreshTrigger }: ExpenseListProp
   return (
     <div className="expense-list">
       <div className="expense-header-section">
-        <h2>Expenses</h2>
-        
         {/* Filter Controls */}
         <div className="filter-controls">
           <div className="filter-row">
@@ -242,7 +240,6 @@ export const ExpenseList = ({ onExpenseSelect, refreshTrigger }: ExpenseListProp
                   )}
                   {expense.tags && expense.tags.length > 0 && (
                     <div className="expense-tags">
-                      <strong>Tags:</strong>
                       <div className="tags-list">
                         {expense.tags.map(tag => (
                           <span key={tag.id} className={`tag tag-${tag.color}`}>
