@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "expense-tracker": {
+      "command": "node",
+      "args": [
+        "dist/mcp-server.js"
+      ],
+      "cwd": "REPLACE_WITH_YOUR_PATH/expense-tracker/backend",
+      "env": {}
+    }
+  }
+}

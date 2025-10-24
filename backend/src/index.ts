@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { expenseRouter } from './routes/expenses';
 import { chartRouter } from './routes/charts';
 import { currencyRouter } from './routes/currency';
+import { chatRouter } from './routes/chat';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/api/expenses', expenseRouter);
 app.use('/api/charts', chartRouter);
 app.use('/api/currency', currencyRouter);
+app.use('/api/chat', chatRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });

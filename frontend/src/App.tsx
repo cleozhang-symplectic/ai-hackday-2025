@@ -3,6 +3,7 @@ import { ExpenseList } from './components/ExpenseList';
 import { ExpenseForm } from './components/ExpenseForm';
 import { Analytics } from './components/Analytics';
 import { CurrencySettings } from './components/CurrencySettings';
+import { Chatbox } from './components/Chatbox';
 import { Expense } from './types';
 import './App.css';
 
@@ -14,6 +15,7 @@ function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activeTab, setActiveTab] = useState<TabType>('expenses');
   const [showCurrencySettings, setShowCurrencySettings] = useState(false);
+  const [showChatbox, setShowChatbox] = useState(false);
 
   const handleExpenseSelect = (expense: Expense | null) => {
     setSelectedExpense(expense);
@@ -23,6 +25,10 @@ function App() {
   const handleFormSave = () => {
     setSelectedExpense(null);
     setShowForm(false);
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleChatUpdate = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
@@ -97,6 +103,22 @@ function App() {
       {showCurrencySettings && (
         <CurrencySettings onClose={() => setShowCurrencySettings(false)} />
       )}
+
+      {/* Chat Toggle Button */}
+      <button
+        onClick={() => setShowChatbox(true)}
+        className="chat-toggle-btn"
+        title="Chat with AI Assistant"
+      >
+        🤖
+      </button>
+
+      {/* Chatbox */}
+      <Chatbox 
+        isOpen={showChatbox} 
+        onClose={() => setShowChatbox(false)}
+        onUpdate={handleChatUpdate}
+      />
     </div>
   );
 }

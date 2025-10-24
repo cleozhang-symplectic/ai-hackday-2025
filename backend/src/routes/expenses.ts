@@ -1,46 +1,17 @@
 import { Router, Request, Response } from 'express';
-import { Expense } from '../types';
+import { expenseService } from '../services/expenseService';
 
 export const expenseRouter = Router();
 
-// In-memory storage (replace with database in production)
-let expenses: Expense[] = [
-  {
-    id: '1',
-    title: 'Groceries',
-    amount: 75.50,
-    currency: 'USD',
-    category: 'Food',
-    date: '2024-01-15',
-    description: 'Weekly grocery shopping',
-    tags: [
-      { id: 'tag1', name: 'Essential', color: 'green' },
-      { id: 'tag2', name: 'Weekly', color: 'blue' }
-    ]
-  },
-  {
-    id: '2', 
-    title: 'Gas',
-    amount: 45.00,
-    currency: 'USD',
-    category: 'Transportation',
-    date: '2024-01-14',
-    description: 'Fuel for car',
-    tags: [
-      { id: 'tag1', name: 'Essential', color: 'green' },
-      { id: 'tag3', name: 'Vehicle', color: 'red' }
-    ]
-  }
-];
-
 // GET /api/expenses - Get all expenses
 expenseRouter.get('/', (req: Request, res: Response) => {
+  const expenses = expenseService.getAllExpenses();
   res.json(expenses);
 });
 
 // GET /api/expenses/:id - Get expense by ID
 expenseRouter.get('/:id', (req: Request, res: Response) => {
-  const expense = expenses.find(e => e.id === req.params.id);
+  const expense = expenseService.getExpenseById(req.params.id);
   if (!expense) {
     return res.status(404).json({ error: 'Expense not found' });
   }
@@ -55,50 +26,50 @@ expenseRouter.post('/', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const newExpense: Expense = {
-    id: Date.now().toString(),
-    title,
-    amount: parseFloat(amount),
-    currency: currency || 'USD', // Default to USD if not provided
-    category,
-    date,
-    description,
-    tags: tags || []
-  };
+  try {
+    const newExpense = expenseService.createExpense({
+      title,
+      amount: parseFloat(amount),
+      currency: currency || 'USD',
+      category,
+      date,
+      description,
+      tags: tags || []
+    });
 
-  expenses.push(newExpense);
-  res.status(201).json(newExpense);
+    res.status(201).json(newExpense);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create expense' });
+  }
 });
 
 // PUT /api/expenses/:id - Update expense
 expenseRouter.put('/:id', (req: Request, res: Response) => {
-  const index = expenses.findIndex(e => e.id === req.params.id);
-  if (index === -1) {
+  const { title, amount, currency, category, date, description, tags } = req.body;
+  
+  const updates: any = {};
+  if (title !== undefined) updates.title = title;
+  if (amount !== undefined) updates.amount = parseFloat(amount);
+  if (currency !== undefined) updates.currency = currency;
+  if (category !== undefined) updates.category = category;
+  if (date !== undefined) updates.date = date;
+  if (description !== undefined) updates.description = description;
+  if (tags !== undefined) updates.tags = tags;
+
+  const updatedExpense = expenseService.updateExpense(req.params.id, updates);
+  if (!updatedExpense) {
     return res.status(404).json({ error: 'Expense not found' });
   }
 
-  const { title, amount, currency, category, date, description, tags } = req.body;
-  expenses[index] = {
-    ...expenses[index],
-    title: title || expenses[index].title,
-    amount: amount ? parseFloat(amount) : expenses[index].amount,
-    currency: currency || expenses[index].currency,
-    category: category || expenses[index].category,
-    date: date || expenses[index].date,
-    description: description !== undefined ? description : expenses[index].description,
-    tags: tags !== undefined ? tags : expenses[index].tags
-  };
-
-  res.json(expenses[index]);
+  res.json(updatedExpense);
 });
 
 // DELETE /api/expenses/:id - Delete expense
 expenseRouter.delete('/:id', (req: Request, res: Response) => {
-  const index = expenses.findIndex(e => e.id === req.params.id);
-  if (index === -1) {
+  const success = expenseService.deleteExpense(req.params.id);
+  if (!success) {
     return res.status(404).json({ error: 'Expense not found' });
   }
 
-  expenses.splice(index, 1);
   res.status(204).send();
 });

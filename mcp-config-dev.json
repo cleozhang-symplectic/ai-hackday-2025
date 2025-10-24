@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "expense-tracker-dev": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "src/mcp-server.ts"
+      ],
+      "cwd": "./backend",
+      "env": {}
+    }
+  }
+}
