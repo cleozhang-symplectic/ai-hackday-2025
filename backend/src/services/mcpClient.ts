@@ -1,5 +1,6 @@
 import { expenseService } from './expenseService';
 import { currencyService } from './currencyService';
+import { budgetService } from './budgetService';
 import { Currency } from '../types';
 
 interface MCPTool {
@@ -98,6 +99,93 @@ class MCPClientWrapper {
         },
         required: ['amount', 'from', 'to']
       }
+    },
+    {
+      name: 'create_budget',
+      description: 'Create a new monthly budget for a category',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Budget name (e.g., "Monthly Groceries")' },
+          category: { type: 'string', description: 'Budget category (e.g., "Food", "Transportation", "Entertainment")' },
+          amount: { type: 'number', description: 'Budget amount (numeric value)' },
+          currency: { type: 'string', description: 'Currency code (defaults to USD)', default: 'USD' },
+          month: { type: 'string', description: 'Month in YYYY-MM format (defaults to current month)' }
+        },
+        required: ['name', 'category', 'amount']
+      }
+    },
+    {
+      name: 'list_budgets',
+      description: 'List budgets with optional month filtering',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          month: { type: 'string', description: 'Filter by month (YYYY-MM format, optional)' }
+        }
+      }
+    },
+    {
+      name: 'get_budget',
+      description: 'Get details of a specific budget by ID',
+      inputSchema: {
+        type: 'object',
+        properties: { id: { type: 'string', description: 'Budget ID' } },
+        required: ['id']
+      }
+    },
+    {
+      name: 'update_budget',
+      description: 'Update an existing budget',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'Budget ID to update' },
+          name: { type: 'string', description: 'New budget name (optional)' },
+          category: { type: 'string', description: 'New category (optional)' },
+          amount: { type: 'number', description: 'New budget amount (optional)' },
+          currency: { type: 'string', description: 'New currency (optional)' },
+          month: { type: 'string', description: 'New month in YYYY-MM format (optional)' }
+        },
+        required: ['id']
+      }
+    },
+    {
+      name: 'delete_budget',
+      description: 'Delete a budget by ID',
+      inputSchema: {
+        type: 'object',
+        properties: { id: { type: 'string', description: 'Budget ID to delete' } },
+        required: ['id']
+      }
+    },
+    {
+      name: 'get_budget_warnings',
+      description: 'Get budget warnings for overspending or approaching limits',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          month: { type: 'string', description: 'Month to check (YYYY-MM format, defaults to current month)' }
+        }
+      }
+    },
+    {
+      name: 'get_budget_summary',
+      description: 'Get budget summary and analytics',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          month: { type: 'string', description: 'Month for summary (YYYY-MM format, optional for overall summary)' }
+        }
+      }
+    },
+    {
+      name: 'refresh_budget_amounts',
+      description: 'Refresh spent amounts for all budgets based on current expenses',
+      inputSchema: {
+        type: 'object',
+        properties: {}
+      }
     }
   ];
 
@@ -122,6 +210,22 @@ class MCPClientWrapper {
           return await this.handleGetSpendingSummary(args);
         case 'convert_currency':
           return await this.handleConvertCurrency(args);
+        case 'create_budget':
+          return await this.handleCreateBudget(args);
+        case 'list_budgets':
+          return await this.handleListBudgets(args);
+        case 'get_budget':
+          return await this.handleGetBudget(args);
+        case 'update_budget':
+          return await this.handleUpdateBudget(args);
+        case 'delete_budget':
+          return await this.handleDeleteBudget(args);
+        case 'get_budget_warnings':
+          return await this.handleGetBudgetWarnings(args);
+        case 'get_budget_summary':
+          return await this.handleGetBudgetSummary(args);
+        case 'refresh_budget_amounts':
+          return await this.handleRefreshBudgetAmounts(args);
         default:
           throw new Error(`Unknown tool: ${toolName}`);
       }
@@ -337,6 +441,239 @@ class MCPClientWrapper {
       };
     } catch (error) {
       throw new Error(`Currency conversion failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private async handleCreateBudget(args: any) {
+    const { name, category, amount, currency = 'USD', month } = args;
+
+    if (!name || !category || !amount) {
+      throw new Error('Missing required fields: name, category, and amount are required');
+    }
+
+    const budgetMonth = month || (() => {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    })();
+
+    // Validate month format
+    const monthRegex = /^\d{4}-\d{2}$/;
+    if (!monthRegex.test(budgetMonth)) {
+      throw new Error('Month must be in YYYY-MM format');
+    }
+
+    const newBudget = await budgetService.createBudget({
+      name,
+      category,
+      amount: parseFloat(amount),
+      currency: currency as Currency,
+      month: budgetMonth
+    });
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `🎯 **Budget created successfully!**\n\n**${newBudget.name}**\n- Category: ${newBudget.category}\n- Amount: ${newBudget.currency} ${newBudget.amount}\n- Month: ${new Date(newBudget.month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}\n- Current Spent: ${newBudget.currency} ${newBudget.spent}\n- Remaining: ${newBudget.currency} ${(newBudget.amount - newBudget.spent).toFixed(2)}\n- ID: ${newBudget.id}`,
+        },
+      ],
+    };
+  }
+
+  private async handleListBudgets(args: any) {
+    const { month } = args;
+
+    const budgets = month ? await budgetService.getBudgetsByMonth(month) : await budgetService.getAllBudgets();
+
+    if (budgets.length === 0) {
+      const monthText = month ? ` for ${new Date(month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}` : '';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `No budgets found${monthText}.`,
+          },
+        ],
+      };
+    }
+
+    const budgetList = budgets.map(budget => {
+      const utilization = budget.amount > 0 ? Math.round((budget.spent / budget.amount) * 100) : 0;
+      const statusEmoji = utilization >= 100 ? '🚨' : utilization >= 80 ? '⚠️' : utilization >= 50 ? '💡' : '✅';
+      return `${statusEmoji} **${budget.name}** (${budget.category})\n  Budget: ${budget.currency} ${budget.amount} | Spent: ${budget.currency} ${budget.spent} (${utilization}%)`;
+    }).join('\n\n');
+
+    const monthText = month ? ` for ${new Date(month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}` : '';
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `🎯 **Budgets${monthText}:**\n\n${budgetList}`,
+        },
+      ],
+    };
+  }
+
+  private async handleGetBudget(args: any) {
+    const { id } = args;
+
+    const budget = budgetService.getBudgetById(id);
+    if (!budget) {
+      throw new Error(`Budget with ID ${id} not found`);
+    }
+
+    const utilization = budget.amount > 0 ? Math.round((budget.spent / budget.amount) * 100) : 0;
+    const remaining = budget.amount - budget.spent;
+    const statusEmoji = utilization >= 100 ? '🚨' : utilization >= 80 ? '⚠️' : utilization >= 50 ? '💡' : '✅';
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `${statusEmoji} **Budget Details:**\n\n**${budget.name}**\n- ID: ${budget.id}\n- Category: ${budget.category}\n- Budget Amount: ${budget.currency} ${budget.amount}\n- Spent: ${budget.currency} ${budget.spent}\n- Remaining: ${budget.currency} ${remaining.toFixed(2)}\n- Utilization: ${utilization}%\n- Month: ${new Date(budget.month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}\n- Created: ${new Date(budget.createdAt).toLocaleDateString()}\n- Updated: ${new Date(budget.updatedAt).toLocaleDateString()}`,
+        },
+      ],
+    };
+  }
+
+  private async handleUpdateBudget(args: any) {
+    const { id, ...updates } = args;
+
+    const cleanUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([_, value]) => value !== undefined)
+    );
+
+    if (Object.keys(cleanUpdates).length === 0) {
+      throw new Error('No updates provided');
+    }
+
+    // Validate month format if provided
+    if (cleanUpdates.month) {
+      const monthRegex = /^\d{4}-\d{2}$/;
+      if (typeof cleanUpdates.month === 'string' && !monthRegex.test(cleanUpdates.month)) {
+        throw new Error('Month must be in YYYY-MM format');
+      }
+    }
+
+    const updatedBudget = budgetService.updateBudget(id, cleanUpdates);
+    if (!updatedBudget) {
+      throw new Error(`Budget with ID ${id} not found`);
+    }
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `✅ **Budget updated successfully!**\n\n**${updatedBudget.name}**\n- Category: ${updatedBudget.category}\n- Amount: ${updatedBudget.currency} ${updatedBudget.amount}\n- Month: ${new Date(updatedBudget.month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}\n- Current Spent: ${updatedBudget.currency} ${updatedBudget.spent}\n- ID: ${updatedBudget.id}`,
+        },
+      ],
+    };
+  }
+
+  private async handleDeleteBudget(args: any) {
+    const { id } = args;
+
+    const budget = budgetService.getBudgetById(id);
+    if (!budget) {
+      throw new Error(`Budget with ID ${id} not found`);
+    }
+
+    const success = budgetService.deleteBudget(id);
+    if (!success) {
+      throw new Error(`Failed to delete budget with ID ${id}`);
+    }
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `🗑️ **Budget deleted successfully!**\n\nDeleted: **${budget.name}** (${budget.currency} ${budget.amount})`,
+        },
+      ],
+    };
+  }
+
+  private async handleGetBudgetWarnings(args: any) {
+    const { month } = args;
+
+    const warnings = month ? await budgetService.getBudgetWarnings(month) : await budgetService.getCurrentMonthWarnings();
+
+    if (warnings.length === 0) {
+      const monthText = month ? ` for ${new Date(month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}` : ' for this month';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `✅ **Great job!** No budget warnings${monthText}. All your budgets are within healthy spending limits.`,
+          },
+        ],
+      };
+    }
+
+    const warningList = warnings.map(warning => {
+      const emoji = warning.warningLevel === 'danger' ? '🚨' : warning.warningLevel === 'warning' ? '⚠️' : '💡';
+      const message = warning.percentage >= 100 
+        ? `You've exceeded your budget by ${warning.currency} ${(warning.amount - warning.budgetAmount).toFixed(2)}`
+        : warning.percentage >= 80
+        ? `You're approaching your budget limit (${Math.round(warning.percentage)}% used)`
+        : `You've used ${Math.round(warning.percentage)}% of your budget`;
+      
+      return `${emoji} **${warning.budgetName}** (${warning.category})\n  ${message}\n  Spent: ${warning.currency} ${warning.amount} / Budget: ${warning.currency} ${warning.budgetAmount}`;
+    }).join('\n\n');
+
+    const monthText = month ? ` for ${new Date(month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}` : ' for this month';
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `⚠️ **Budget Alerts${monthText}:**\n\n${warningList}`,
+        },
+      ],
+    };
+  }
+
+  private async handleGetBudgetSummary(args: any) {
+    const { month } = args;
+
+    const summary = await budgetService.getBudgetSummary(month);
+
+    const categoryDetails = summary.categoryBreakdown
+      .sort((a, b) => b.utilization - a.utilization)
+      .map(cat => {
+        const emoji = cat.utilization >= 100 ? '🚨' : cat.utilization >= 80 ? '⚠️' : cat.utilization >= 50 ? '💡' : '✅';
+        return `  ${emoji} ${cat.category}: ${cat.budgetCount} budget(s), ${cat.utilization.toFixed(1)}% utilization`;
+      })
+      .join('\n');
+
+    const monthText = month ? ` for ${new Date(month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}` : '';
+    const overallEmoji = summary.averageUtilization >= 100 ? '🚨' : summary.averageUtilization >= 80 ? '⚠️' : summary.averageUtilization >= 50 ? '💡' : '✅';
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `${overallEmoji} **Budget Summary${monthText}:**\n\n**Overview:**\n- Total Budgets: ${summary.totalBudgets}\n- Total Budget Amount: $${summary.totalBudgetAmount}\n- Total Spent: $${summary.totalSpent}\n- Remaining: $${summary.remainingAmount}\n- Average Utilization: ${summary.averageUtilization.toFixed(1)}%\n\n**By Category:**\n${categoryDetails}`,
+        },
+      ],
+    };
+  }
+
+  private async handleRefreshBudgetAmounts(args: any) {
+    try {
+      await budgetService.updateAllSpentAmounts();
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `✅ **Budget amounts refreshed successfully!**\n\nAll budget spent amounts have been recalculated based on your current expenses.`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Failed to refresh budget amounts: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

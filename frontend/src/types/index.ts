@@ -42,6 +42,29 @@ export interface ChartData {
   count: number;
 }
 
+export interface Budget {
+  id: string;
+  name: string;
+  category: string;
+  amount: number;
+  currency: Currency;
+  month: string; // Format: YYYY-MM
+  spent: number; // Current amount spent in this category for the month
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BudgetWarning {
+  budgetId: string;
+  budgetName: string;
+  category: string;
+  percentage: number; // Percentage of budget spent
+  amount: number;
+  budgetAmount: number;
+  currency: Currency;
+  warningLevel: 'info' | 'warning' | 'danger'; // 50%, 80%, 100%+
+}
+
 export const CURRENCIES: CurrencyInfo[] = [
   { code: 'USD', name: 'US Dollar', symbol: '$' },
   { code: 'EUR', name: 'Euro', symbol: '€' },

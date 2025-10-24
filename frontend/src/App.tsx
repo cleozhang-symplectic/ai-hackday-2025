@@ -4,10 +4,12 @@ import { ExpenseForm } from './components/ExpenseForm';
 import { Analytics } from './components/Analytics';
 import { CurrencySettings } from './components/CurrencySettings';
 import { Chatbox } from './components/Chatbox';
+import { Budgets } from './components/Budgets';
+import { BudgetWarnings } from './components/BudgetWarnings';
 import { Expense } from './types';
 import './App.css';
 
-type TabType = 'expenses' | 'analytics';
+type TabType = 'expenses' | 'analytics' | 'budgets';
 
 function App() {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
@@ -67,6 +69,12 @@ function App() {
             💳 Expenses
           </button>
           <button 
+            className={`nav-tab ${activeTab === 'budgets' ? 'active' : ''}`}
+            onClick={() => setActiveTab('budgets')}
+          >
+            🎯 Budgets
+          </button>
+          <button 
             className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
             onClick={() => setActiveTab('analytics')}
           >
@@ -84,6 +92,7 @@ function App() {
           />
         ) : activeTab === 'expenses' ? (
           <div className="expenses-section">
+            <BudgetWarnings autoRefresh={true} hideWhenEmpty={true} />
             <div className="expenses-header">
               <h2>💳 Your Expenses</h2>
               <button onClick={handleAddNew} className="add-btn">
@@ -95,6 +104,8 @@ function App() {
               refreshTrigger={refreshTrigger}
             />
           </div>
+        ) : activeTab === 'budgets' ? (
+          <Budgets />
         ) : (
           <Analytics />
         )}

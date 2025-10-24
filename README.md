@@ -4,7 +4,19 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 
 ## Features
 
-### 🤖 AI Chat Assistant (NEW!)
+### 🎯 Budget Management (NEW!)
+- ✅ **Monthly budget tracking** with category-based budgets
+- ✅ **Gentle budget warnings** at 50%, 80%, and 100% thresholds
+- ✅ **Multi-currency budget support** with automatic conversion
+- ✅ **Real-time spent amount calculation** based on actual expenses
+- ✅ **Budget utilization analytics** with visual progress indicators
+- ✅ **AI chatbot budget management** - create, update, and track budgets via chat
+- ✅ **Budget summary dashboard** with category breakdowns
+- ✅ **Automatic budget alerts** displayed on expenses tab
+- ✅ **Responsive budget interface** optimized for mobile and desktop
+
+### 🤖 AI Chat Assistant
+- ✅ **Enhanced budget management** - "Create a $500 food budget for this month"
 - ✅ **Natural language expense management** - "Add a $15 lunch expense"
 - ✅ **Smart conversation interface** with message history and context
 - ✅ **Automatic expense parsing** from natural language input
@@ -13,11 +25,14 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 - ✅ **AI-powered analytics** - ask for spending summaries and insights
 - ✅ **Currency conversion** through chat commands
 - ✅ **Voice-like interactions** - no complex forms or navigation needed
+- ✅ **Budget warnings and summaries** through AI conversation
 
 ### Backend (Express + TypeScript)
 - ✅ RESTful API for expense CRUD operations
+- ✅ **Budget management API** with full CRUD operations
+- ✅ **Budget warnings and analytics** endpoints
 - ✅ **MCP (Model Context Protocol) server** for AI assistant integration
-- ✅ **Chat API endpoints** with natural language processing
+- ✅ **Enhanced chat API** with budget management tools
 - ✅ Chart data endpoints for expense analytics
 - ✅ CORS enabled for frontend integration
 - ✅ TypeScript for type safety
@@ -26,6 +41,8 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 - ✅ Real-time exchange rate fetching
 
 ### Frontend (React + TypeScript)
+- ✅ **Comprehensive budget interface** with form, list, and analytics
+- ✅ **Budget warnings component** with auto-refresh functionality
 - ✅ **Interactive AI chatbot interface** with modern chat UI
 - ✅ **Smart suggestion system** for new users
 - ✅ Modern React with hooks and functional components
@@ -37,7 +54,7 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 - ✅ Comprehensive tagging system with custom colors
 - ✅ Analytics dashboard with interactive charts
 - ✅ CSV export functionality
-- ✅ Tab-based navigation (Expenses/Analytics)
+- ✅ **Three-tab navigation** (Expenses/Budgets/Analytics)
 - ✅ Multi-currency support with real-time conversion
 - ✅ Flexible sorting system (date, amount, title, category)
 - ✅ Currency settings configuration
@@ -127,6 +144,19 @@ npm run build
 - `PUT /api/expenses/:id` - Update expense
 - `DELETE /api/expenses/:id` - Delete expense
 
+### Budgets (NEW!)
+- `GET /api/budgets` - Get all budgets (optional ?month=YYYY-MM filter)
+- `GET /api/budgets/:id` - Get budget by ID
+- `POST /api/budgets` - Create new budget
+- `PUT /api/budgets/:id` - Update budget
+- `DELETE /api/budgets/:id` - Delete budget
+- `GET /api/budgets/warnings` - Get current month's budget warnings
+- `GET /api/budgets/warnings/:month` - Get budget warnings for specific month
+- `GET /api/budgets/summary` - Get overall budget summary
+- `GET /api/budgets/summary/:month` - Get budget summary for specific month
+- `GET /api/budgets/categories` - Get all available expense categories
+- `POST /api/budgets/refresh` - Refresh spent amounts for all budgets
+
 ### Charts
 - `GET /api/charts/category` - Get expenses grouped by category
 - `GET /api/charts/monthly` - Get monthly spending data
@@ -146,10 +176,40 @@ interface Expense {
   id: string;
   title: string;
   amount: number;
+  currency: Currency;
   category: string;
   date: string;
   description?: string;
-  tags?: Tag[];
+  tags: Tag[];
+}
+```
+
+### Budget (NEW!)
+```typescript
+interface Budget {
+  id: string;
+  name: string;
+  category: string;
+  amount: number;
+  currency: Currency;
+  month: string; // Format: YYYY-MM
+  spent: number; // Current amount spent in this category for the month
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+### Budget Warning (NEW!)
+```typescript
+interface BudgetWarning {
+  budgetId: string;
+  budgetName: string;
+  category: string;
+  percentage: number; // Percentage of budget spent
+  amount: number;
+  budgetAmount: number;
+  currency: Currency;
+  warningLevel: 'info' | 'warning' | 'danger'; // 50%, 80%, 100%+
 }
 ```
 
@@ -162,6 +222,11 @@ interface Tag {
 }
 
 type TagColor = 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'pink' | 'indigo' | 'gray';
+```
+
+### Currency Support
+```typescript
+type Currency = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CAD' | 'AUD' | 'CHF' | 'CNY' | 'INR' | 'SGD' | 'HKD' | 'NZD';
 ```
 
 ## Development
@@ -298,6 +363,39 @@ Get spending analytics and summary
 Convert an amount between currencies
 - **Required**: amount, from currency, to currency
 
+#### 🎯 `create_budget` (NEW!)
+Create a new monthly budget for a category
+- **Required**: name, category, amount
+- **Optional**: currency (default USD), month (default current month)
+
+#### 📋 `list_budgets` (NEW!)
+List budgets with optional month filtering
+- **Optional**: month (YYYY-MM format)
+
+#### 🔍 `get_budget` (NEW!)
+Get details of a specific budget by ID
+- **Required**: budget ID
+
+#### ✏️ `update_budget` (NEW!)
+Update an existing budget
+- **Required**: budget ID
+- **Optional**: any budget fields to update
+
+#### 🗑️ `delete_budget` (NEW!)
+Delete a budget by ID
+- **Required**: budget ID
+
+#### ⚠️ `get_budget_warnings` (NEW!)
+Get budget warnings for overspending or approaching limits
+- **Optional**: month (YYYY-MM format, defaults to current month)
+
+#### 📈 `get_budget_summary` (NEW!)
+Get budget summary and analytics
+- **Optional**: month (YYYY-MM format for specific month summary)
+
+#### 🔄 `refresh_budget_amounts` (NEW!)
+Refresh spent amounts for all budgets based on current expenses
+
 ### Connecting to AI Assistants
 
 #### For Claude Desktop App
@@ -343,6 +441,13 @@ Once connected, you can interact with your expenses naturally:
 - "Add a $12.50 lunch expense for today"
 - "I spent €25 on transportation yesterday"
 - "Add coffee expense: $4.50, Food category, from Starbucks"
+
+**Budget Management:**
+- "Create a $500 food budget for this month"
+- "Show me my budget warnings"
+- "What's my budget summary for December?"
+- "Update my transportation budget to $300"
+- "How much have I spent on groceries this month?"
 
 **Viewing Expenses:**
 - "Show me my recent expenses"
@@ -396,7 +501,10 @@ The MCP server operates on your local machine and doesn't expose any network por
 - [ ] Bulk expense operations via MCP
 - [ ] Database integration (PostgreSQL/MongoDB)
 - [ ] User authentication and authorization
-- [ ] Budget tracking and alerts
+- [x] ✅ **Budget tracking and alerts** - Completed!
+- [ ] Advanced budget features (recurring budgets, budget templates)
+- [ ] Budget notifications and email alerts
+- [ ] Budget vs actual spending charts
 - [ ] PDF export functionality
 - [ ] Expense receipt uploads
 - [ ] Recurring expense management
@@ -404,6 +512,9 @@ The MCP server operates on your local machine and doesn't expose any network por
 - [ ] Historical exchange rate tracking
 - [ ] Custom currency rate override
 - [ ] Batch currency conversion for existing data
+- [ ] Budget forecasting and predictions
+- [ ] Expense categorization AI suggestions
+- [ ] Multi-user budget sharing
 
 ## 🤖 AI Chatbot Assistant
 
@@ -430,6 +541,7 @@ The expense tracker now includes a **built-in AI chatbot** that allows you to ma
 
 **Supported Commands:**
 - **Add expenses**: "Add a $20 dinner expense with italian tag"
+- **Budget management**: "Create a $400 groceries budget" or "Show my budget warnings"
 - **View expenses**: "Show me all my expenses" or "List coffee expenses"
 - **Get summaries**: "What's my spending summary?" or "How much did I spend on food?"
 - **Currency conversion**: "Convert $50 to GBP"

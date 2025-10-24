@@ -1,6 +1,11 @@
 import { Expense, Tag } from '../types';
 
 // In-memory storage (replace with database in production)
+const getCurrentDate = () => {
+  const now = new Date();
+  return now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+};
+
 let expenses: Expense[] = [
   {
     id: '1',
@@ -8,7 +13,7 @@ let expenses: Expense[] = [
     amount: 75.50,
     currency: 'USD',
     category: 'Food',
-    date: '2024-01-15',
+    date: getCurrentDate(),
     description: 'Weekly grocery shopping',
     tags: [
       { id: 'tag1', name: 'Essential', color: 'green' },
@@ -21,11 +26,23 @@ let expenses: Expense[] = [
     amount: 45.00,
     currency: 'USD',
     category: 'Transportation',
-    date: '2024-01-14',
+    date: getCurrentDate(),
     description: 'Fuel for car',
     tags: [
       { id: 'tag1', name: 'Essential', color: 'green' },
       { id: 'tag3', name: 'Vehicle', color: 'red' }
+    ]
+  },
+  {
+    id: '3',
+    title: 'Movie Tickets',
+    amount: 20.00,
+    currency: 'GBP',
+    category: 'Entertainment',
+    date: getCurrentDate(),
+    description: 'Cinema tickets for weekend',
+    tags: [
+      { id: 'tag4', name: 'Fun', color: 'purple' }
     ]
   }
 ];
