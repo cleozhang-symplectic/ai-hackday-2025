@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { expenseRouter } from './routes/expenses';
 import { chartRouter } from './routes/charts';
+import { currencyRouter } from './routes/currency';
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 // Routes
 app.use('/api/expenses', expenseRouter);
 app.use('/api/charts', chartRouter);
+app.use('/api/currency', currencyRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });

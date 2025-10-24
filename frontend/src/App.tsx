@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ExpenseList } from './components/ExpenseList';
 import { ExpenseForm } from './components/ExpenseForm';
 import { Analytics } from './components/Analytics';
+import { CurrencySettings } from './components/CurrencySettings';
 import { Expense } from './types';
 import './App.css';
 
@@ -12,6 +13,7 @@ function App() {
   const [showForm, setShowForm] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [activeTab, setActiveTab] = useState<TabType>('expenses');
+  const [showCurrencySettings, setShowCurrencySettings] = useState(false);
 
   const handleExpenseSelect = (expense: Expense | null) => {
     setSelectedExpense(expense);
@@ -37,8 +39,17 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>💰 Expense Tracker</h1>
-        <p>Track your daily expenses and visualize your spending patterns</p>
+        <button 
+          onClick={() => setShowCurrencySettings(true)}
+          className="settings-btn"
+          title="Currency Settings"
+        >
+          💱
+        </button>
+        <div className="header-content">
+          <h1>💰 Expense Tracker</h1>
+          <p>Track your daily expenses and visualize your spending patterns</p>
+        </div>
       </header>
 
       {!showForm && (
@@ -82,6 +93,10 @@ function App() {
           <Analytics />
         )}
       </main>
+
+      {showCurrencySettings && (
+        <CurrencySettings onClose={() => setShowCurrencySettings(false)} />
+      )}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Expense, Tag } from '../types';
+import { Expense, Tag, Currency, CURRENCIES } from '../types';
 import { expenseAPI } from '../services/api';
 import { TagSelector } from './TagSelector';
+import { settingsService } from '../services/settingsService';
 
 interface ExpenseFormProps {
   expense: Expense | null;
@@ -13,6 +14,7 @@ export const ExpenseForm = ({ expense, onSave, onCancel }: ExpenseFormProps) => 
   const [formData, setFormData] = useState({
     title: expense?.title || '',
     amount: expense?.amount?.toString() || '',
+    currency: expense?.currency || settingsService.getMainCurrency(),
     category: expense?.category || '',
     date: expense?.date || new Date().toISOString().split('T')[0],
     description: expense?.description || ''
@@ -77,6 +79,7 @@ export const ExpenseForm = ({ expense, onSave, onCancel }: ExpenseFormProps) => 
       const expenseData = {
         title: formData.title,
         amount: parseFloat(formData.amount),
+        currency: formData.currency as Currency,
         category: formData.category,
         date: formData.date,
         description: formData.description,
@@ -124,18 +127,36 @@ export const ExpenseForm = ({ expense, onSave, onCancel }: ExpenseFormProps) => 
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="amount">Amount *</label>
-          <input
-            type="number"
-            id="amount"
-            name="amount"
-            value={formData.amount}
-            onChange={handleChange}
-            step="0.01"
-            min="0"
-            required
-          />
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="amount">Amount *</label>
+            <input
+              type="number"
+              id="amount"
+              name="amount"
+              value={formData.amount}
+              onChange={handleChange}
+              step="0.01"
+              min="0"
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="currency">Currency</label>
+            <select
+              id="currency"
+              name="currency"
+              value={formData.currency}
+              onChange={handleChange}
+            >
+              {CURRENCIES.map(currency => (
+                <option key={currency.code} value={currency.code}>
+                  {currency.symbol} {currency.code}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="form-group">

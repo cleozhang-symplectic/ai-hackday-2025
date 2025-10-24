@@ -9,6 +9,7 @@ let expenses: Expense[] = [
     id: '1',
     title: 'Groceries',
     amount: 75.50,
+    currency: 'USD',
     category: 'Food',
     date: '2024-01-15',
     description: 'Weekly grocery shopping',
@@ -21,6 +22,7 @@ let expenses: Expense[] = [
     id: '2', 
     title: 'Gas',
     amount: 45.00,
+    currency: 'USD',
     category: 'Transportation',
     date: '2024-01-14',
     description: 'Fuel for car',
@@ -47,7 +49,7 @@ expenseRouter.get('/:id', (req: Request, res: Response) => {
 
 // POST /api/expenses - Create new expense
 expenseRouter.post('/', (req: Request, res: Response) => {
-  const { title, amount, category, date, description, tags } = req.body;
+  const { title, amount, currency, category, date, description, tags } = req.body;
   
   if (!title || !amount || !category || !date) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -57,6 +59,7 @@ expenseRouter.post('/', (req: Request, res: Response) => {
     id: Date.now().toString(),
     title,
     amount: parseFloat(amount),
+    currency: currency || 'USD', // Default to USD if not provided
     category,
     date,
     description,
@@ -74,11 +77,12 @@ expenseRouter.put('/:id', (req: Request, res: Response) => {
     return res.status(404).json({ error: 'Expense not found' });
   }
 
-  const { title, amount, category, date, description, tags } = req.body;
+  const { title, amount, currency, category, date, description, tags } = req.body;
   expenses[index] = {
     ...expenses[index],
     title: title || expenses[index].title,
     amount: amount ? parseFloat(amount) : expenses[index].amount,
+    currency: currency || expenses[index].currency,
     category: category || expenses[index].category,
     date: date || expenses[index].date,
     description: description !== undefined ? description : expenses[index].description,

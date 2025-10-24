@@ -10,6 +10,8 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 - ✅ CORS enabled for frontend integration
 - ✅ TypeScript for type safety
 - ✅ In-memory data storage (easily replaceable with database)
+- ✅ Currency conversion API integration
+- ✅ Real-time exchange rate fetching
 
 ### Frontend (React + TypeScript)
 - ✅ Modern React with hooks and functional components
@@ -22,6 +24,9 @@ A full-stack expense tracking application built with Node.js, Express, React, an
 - ✅ Analytics dashboard with interactive charts
 - ✅ CSV export functionality
 - ✅ Tab-based navigation (Expenses/Analytics)
+- ✅ Multi-currency support with real-time conversion
+- ✅ Flexible sorting system (date, amount, title, category)
+- ✅ Currency settings configuration
 
 ## Project Structure
 
@@ -95,6 +100,10 @@ npm run build
 - `GET /api/charts/category` - Get expenses grouped by category
 - `GET /api/charts/monthly` - Get monthly spending data
 
+### Currency
+- `GET /api/currency/rates` - Get current exchange rates
+- `GET /api/currency/rates/:baseCurrency` - Get rates for specific base currency
+
 ### Health Check
 - `GET /api/health` - Server health status
 
@@ -140,6 +149,21 @@ The frontend uses Vite for fast development builds and hot module replacement.
 
 ## Key Features
 
+### 💱 Multi-Currency Support
+- Support for 15+ major currencies (USD, EUR, GBP, JPY, etc.)
+- Real-time exchange rate fetching from external API
+- Offline fallback rates for reliability  
+- Automatic currency conversion for all expenses
+- Currency settings configuration modal
+- Real-time updates when main currency changes
+
+### 🔄 Flexible Sorting System
+- Sort expenses by date (newest/oldest first)
+- Sort by amount (highest/lowest first)
+- Sort by title (A-Z or Z-A)
+- Sort by category (alphabetical)
+- Inline sorting controls with visual indicators
+
 ### 🏷️ Advanced Tagging System
 - Create custom tags with 8 color options
 - Tag-based filtering and search
@@ -148,16 +172,18 @@ The frontend uses Vite for fast development builds and hot module replacement.
 
 ### 📊 Analytics Dashboard
 - Interactive charts powered by Chart.js
+- Currency-aware spending calculations
 - Spending by category (bar chart)
 - Monthly spending trends (line chart)
 - Tag distribution (doughnut chart)
-- Key statistics overview
+- Key statistics overview with converted amounts
 
 ### 🔍 Advanced Filtering
 - Filter by amount ranges (under $50, $50-$100, over $100)
 - Category-based filtering
 - Date range filtering
 - Tag-based filtering
+- Inline filter controls
 - Combined filter support
 
 ### 📥 Data Export
@@ -180,7 +206,9 @@ The frontend uses Vite for fast development builds and hot module replacement.
 - [ ] Expense receipt uploads
 - [ ] Recurring expense management
 - [ ] Dark mode support
-- [ ] Multi-currency support
+- [ ] Historical exchange rate tracking
+- [ ] Custom currency rate override
+- [ ] Batch currency conversion for existing data
 
 ## Technology Stack
 

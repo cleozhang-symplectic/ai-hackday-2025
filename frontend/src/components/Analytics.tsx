@@ -14,6 +14,8 @@ import {
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { Expense } from '../types';
 import { expenseAPI } from '../services/api';
+import { currencyService } from '../services/currencyService';
+import { settingsService } from '../services/settingsService';
 
 ChartJS.register(
   CategoryScale,
@@ -43,22 +45,78 @@ export function Analytics() {
   const [categoryData, setCategoryData] = useState<ChartData[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [convertedExpenses, setConvertedExpenses] = useState<Expense[]>([]);
 
   useEffect(() => {
     loadAnalyticsData();
   }, []);
 
+  // Listen for currency changes and reload analytics data
+  useEffect(() => {
+    const unsubscribe = settingsService.addCurrencyChangeListener(() => {
+      loadAnalyticsData();
+    });
+
+    return unsubscribe;
+  }, []);
+
   const loadAnalyticsData = async () => {
     try {
-      const [expensesResponse, categoryResponse, monthlyResponse] = await Promise.all([
-        expenseAPI.getExpenses(),
-        fetch('http://localhost:3001/api/charts/category'),
-        fetch('http://localhost:3001/api/charts/monthly')
-      ]);
-
+      const expensesResponse = await expenseAPI.getExpenses();
       setExpenses(expensesResponse);
-      setCategoryData(await categoryResponse.json());
-      setMonthlyData(await monthlyResponse.json());
+
+      // Convert all expenses to main currency
+      const mainCurrency = settingsService.getMainCurrency();
+      const convertedExpensesData: Expense[] = [];
+      
+      for (const expense of expensesResponse) {
+        const convertedAmount = await currencyService.convertAmount(
+          expense.amount,
+          expense.currency,
+          mainCurrency
+        );
+        convertedExpensesData.push({
+          ...expense,
+          amount: convertedAmount,
+          currency: mainCurrency
+        });
+      }
+      
+      setConvertedExpenses(convertedExpensesData);
+
+      // Generate category and monthly data from converted expenses
+      const categoryMap = new Map<string, { amount: number; count: number }>();
+      const monthlyMap = new Map<string, number>();
+
+      convertedExpensesData.forEach(expense => {
+        // Category data
+        const existing = categoryMap.get(expense.category) || { amount: 0, count: 0 };
+        categoryMap.set(expense.category, {
+          amount: existing.amount + expense.amount,
+          count: existing.count + 1
+        });
+
+        // Monthly data
+        const monthKey = expense.date.substring(0, 7); // YYYY-MM format
+        monthlyMap.set(monthKey, (monthlyMap.get(monthKey) || 0) + expense.amount);
+      });
+
+      // Convert maps to arrays
+      const categoryDataArray = Array.from(categoryMap.entries()).map(([category, data]) => ({
+        category,
+        amount: Math.round(data.amount * 100) / 100, // Round to 2 decimal places
+        count: data.count
+      }));
+
+      const monthlyDataArray = Array.from(monthlyMap.entries())
+        .map(([month, amount]) => ({
+          month,
+          amount: Math.round(amount * 100) / 100 // Round to 2 decimal places
+        }))
+        .sort((a, b) => a.month.localeCompare(b.month));
+
+      setCategoryData(categoryDataArray);
+      setMonthlyData(monthlyDataArray);
     } catch (error) {
       console.error('Error loading analytics data:', error);
     } finally {
@@ -67,22 +125,23 @@ export function Analytics() {
   };
 
   const calculateStats = () => {
-    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-    const averageExpense = expenses.length > 0 ? totalExpenses / expenses.length : 0;
-    const highestExpense = expenses.length > 0 ? Math.max(...expenses.map(e => e.amount)) : 0;
+    const totalExpenses = convertedExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const averageExpense = convertedExpenses.length > 0 ? totalExpenses / convertedExpenses.length : 0;
+    const highestExpense = convertedExpenses.length > 0 ? Math.max(...convertedExpenses.map(e => e.amount)) : 0;
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
-    const thisMonthExpenses = expenses.filter(expense => {
+    const thisMonthExpenses = convertedExpenses.filter(expense => {
       const expenseDate = new Date(expense.date);
       return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear;
     });
     const thisMonthTotal = thisMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const mainCurrency = settingsService.getMainCurrency();
 
     return {
-      totalExpenses: totalExpenses.toFixed(2),
-      averageExpense: averageExpense.toFixed(2),
-      highestExpense: highestExpense.toFixed(2),
-      thisMonthTotal: thisMonthTotal.toFixed(2),
+      totalExpenses: currencyService.formatAmount(totalExpenses, mainCurrency),
+      averageExpense: currencyService.formatAmount(averageExpense, mainCurrency),
+      highestExpense: currencyService.formatAmount(highestExpense, mainCurrency),
+      thisMonthTotal: currencyService.formatAmount(thisMonthTotal, mainCurrency),
       totalCount: expenses.length,
       thisMonthCount: thisMonthExpenses.length
     };
@@ -128,7 +187,7 @@ export function Analytics() {
 
   const getTagDistribution = () => {
     const tagCounts: { [key: string]: number } = {};
-    expenses.forEach(expense => {
+    convertedExpenses.forEach(expense => {
       expense.tags?.forEach(tag => {
         tagCounts[tag.name] = (tagCounts[tag.name] || 0) + 1;
       });
@@ -155,16 +214,21 @@ export function Analytics() {
 
   const exportToCSV = () => {
     // Create CSV headers
-    const headers = ['Date', 'Description', 'Amount', 'Category', 'Tags'];
+    const headers = ['Date', 'Description', 'Amount', 'Original Amount', 'Original Currency', 'Category', 'Tags'];
     
     // Convert expenses to CSV rows
-    const csvRows = expenses.map(expense => [
-      expense.date,
-      `"${(expense.description || '').replace(/"/g, '""')}"`, // Escape quotes in description
-      expense.amount.toString(),
-      expense.category,
-      expense.tags ? expense.tags.map(tag => tag.name).join('; ') : ''
-    ]);
+    const csvRows = expenses.map((expense, index) => {
+      const convertedAmount = convertedExpenses[index]?.amount || expense.amount;
+      return [
+        expense.date,
+        `"${(expense.description || '').replace(/"/g, '""')}"`, // Escape quotes in description
+        convertedAmount.toString(),
+        expense.amount.toString(),
+        expense.currency,
+        expense.category,
+        expense.tags ? expense.tags.map(tag => tag.name).join('; ') : ''
+      ];
+    });
     
     // Combine headers and data
     const csvContent = [headers, ...csvRows]
@@ -198,25 +262,25 @@ export function Analytics() {
       <div className="stats-grid">
         <div className="stat-card">
           <h3>Total Expenses</h3>
-          <div className="stat-value">${stats.totalExpenses}</div>
+          <div className="stat-value">{stats.totalExpenses}</div>
           <div className="stat-subtitle">{stats.totalCount} transactions</div>
         </div>
         
         <div className="stat-card">
           <h3>This Month</h3>
-          <div className="stat-value">${stats.thisMonthTotal}</div>
+          <div className="stat-value">{stats.thisMonthTotal}</div>
           <div className="stat-subtitle">{stats.thisMonthCount} transactions</div>
         </div>
         
         <div className="stat-card">
           <h3>Average Expense</h3>
-          <div className="stat-value">${stats.averageExpense}</div>
+          <div className="stat-value">{stats.averageExpense}</div>
           <div className="stat-subtitle">per transaction</div>
         </div>
         
         <div className="stat-card">
           <h3>Highest Expense</h3>
-          <div className="stat-value">${stats.highestExpense}</div>
+          <div className="stat-value">{stats.highestExpense}</div>
           <div className="stat-subtitle">single transaction</div>
         </div>
       </div>
@@ -240,7 +304,8 @@ export function Analytics() {
                     beginAtZero: true,
                     ticks: {
                       callback: function(value) {
-                        return '$' + value;
+                        const mainCurrency = settingsService.getMainCurrency();
+                        return currencyService.formatAmount(Number(value), mainCurrency);
                       }
                     }
                   }
@@ -268,7 +333,8 @@ export function Analytics() {
                     beginAtZero: true,
                     ticks: {
                       callback: function(value) {
-                        return '$' + value;
+                        const mainCurrency = settingsService.getMainCurrency();
+                        return currencyService.formatAmount(Number(value), mainCurrency);
                       }
                     }
                   }
@@ -278,7 +344,7 @@ export function Analytics() {
           </div>
         </div>
 
-        {expenses.some(e => e.tags && e.tags.length > 0) && (
+        {convertedExpenses.some(e => e.tags && e.tags.length > 0) && (
           <div className="chart-container">
             <h3>Tag Distribution</h3>
             <div className="chart-wrapper doughnut-chart">
