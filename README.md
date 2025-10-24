@@ -1,67 +1,47 @@
 # Expense Tracker
 
 A full-stack expense tracking application built with Node.js, Express, React, and TypeScript.
-<img width="1893" height="976" alt="image" src="https://github.com/user-attachments/assets/ec3e0afb-81c8-4cf2-8b63-107fcfc8cfb9" />
-<img width="1859" height="968" alt="image" src="https://github.com/user-attachments/assets/a286eeaa-7511-4198-b413-6042cefe19c1" />
 
 ## Features
 
+### 💰 Expense Management
+- ✅ **Real-time CRUD operations** - add, edit, delete expenses with instant updates
+- ✅ **Advanced filtering system** - filter by amount ranges, categories, dates, and tags
+- ✅ **Comprehensive tagging** - custom tags with 8 color options for better organization
+- ✅ **Flexible sorting** - sort by date, amount, title, or category with visual indicators
+- ✅ **CSV export functionality** - export all expense data with automatic filename generation
+<img width="1893" height="976" alt="image" src="https://github.com/user-attachments/assets/ec3e0afb-81c8-4cf2-8b63-107fcfc8cfb9" />
+
 ### 🎯 Budget Management (NEW!)
-- ✅ **Monthly budget tracking** with category-based budgets
-- ✅ **Gentle budget warnings** at 50%, 80%, and 100% thresholds
-- ✅ **Multi-currency budget support** with automatic conversion
-- ✅ **Real-time spent amount calculation** based on actual expenses
-- ✅ **Budget utilization analytics** with visual progress indicators
-- ✅ **AI chatbot budget management** - create, update, and track budgets via chat
-- ✅ **Budget summary dashboard** with category breakdowns
-- ✅ **Automatic budget alerts** displayed on expenses tab
-- ✅ **Responsive budget interface** optimized for mobile and desktop
+- ✅ **Monthly budget tracking** with category-based budgets and real-time spent calculations
+- ✅ **Smart budget warnings** at 50%, 80%, and 100% thresholds with automatic alerts
+- ✅ **Multi-currency support** with automatic conversion and analytics
+- ✅ **AI chatbot integration** - create, update, and track budgets via natural language
+- ✅ **Budget dashboard** with utilization analytics and responsive mobile interface
 <img width="718" height="764" alt="image" src="https://github.com/user-attachments/assets/e815f72d-786c-4363-9918-9490308a7f08" />
 
+### 📊 Analytics
+- ✅ **Interactive charts** powered by Chart.js with spending by category and monthly trends
+- ✅ **Key statistics overview** with currency-aware spending calculations
+- ✅ **Tag distribution analytics** with visual doughnut charts
+- ✅ **Budget utilization tracking** with progress indicators and warnings
+- ✅ **Real-time data updates** reflecting all expense and budget changes
+<img width="1859" height="968" alt="image" src="https://github.com/user-attachments/assets/a286eeaa-7511-4198-b413-6042cefe19c1" />
+
+### 💱 Multi-Currency
+- ✅ **15+ major currencies** supported (USD, EUR, GBP, JPY, CAD, AUD, CHF, CNY, etc.)
+- ✅ **Real-time exchange rates** with automatic fetching from external APIs
+- ✅ **Offline fallback rates** for reliability when internet is unavailable
+- ✅ **Currency settings modal** with easy configuration and real-time updates
+<img width="1409" height="852" alt="image" src="https://github.com/user-attachments/assets/a1dd96fe-3f21-4119-8fa8-fc9d73d19c28" />
+
 ### 🤖 AI Chat Assistant
-- ✅ **Enhanced budget management** - "Create a $500 food budget for this month"
-- ✅ **Natural language expense management** - "Add a $15 lunch expense"
-- ✅ **Smart conversation interface** with message history and context
-- ✅ **Automatic expense parsing** from natural language input
-- ✅ **Real-time data sync** with the main expense tracker
-- ✅ **Mobile-responsive chat UI** with floating chat button
-- ✅ **AI-powered analytics** - ask for spending summaries and insights
-- ✅ **Currency conversion** through chat commands
-- ✅ **Voice-like interactions** - no complex forms or navigation needed
-- ✅ **Budget warnings and summaries** through AI conversation
+- ✅ **Natural language processing** - "Add a $15 lunch expense" or "Create a $500 food budget"
+- ✅ **Smart conversation interface** with real-time data sync and message history
+- ✅ **Mobile-responsive chat UI** with floating chat button and voice-like interactions
+- ✅ **AI-powered analytics** - get spending summaries, budget warnings, and currency conversion
+- ✅ **Seamless integration** - no complex forms needed, just natural conversation
 <img width="379" height="531" alt="image" src="https://github.com/user-attachments/assets/f874f1f2-7f18-4b17-a848-0d57bab91a08" />
-
-### Backend (Express + TypeScript)
-- ✅ RESTful API for expense CRUD operations
-- ✅ **Budget management API** with full CRUD operations
-- ✅ **Budget warnings and analytics** endpoints
-- ✅ **MCP (Model Context Protocol) server** for AI assistant integration
-- ✅ **Enhanced chat API** with budget management tools
-- ✅ Chart data endpoints for expense analytics
-- ✅ CORS enabled for frontend integration
-- ✅ TypeScript for type safety
-- ✅ In-memory data storage (easily replaceable with database)
-- ✅ Currency conversion API integration
-- ✅ Real-time exchange rate fetching
-
-### Frontend (React + TypeScript)
-- ✅ **Comprehensive budget interface** with form, list, and analytics
-- ✅ **Budget warnings component** with auto-refresh functionality
-- ✅ **Interactive AI chatbot interface** with modern chat UI
-- ✅ **Smart suggestion system** for new users
-- ✅ Modern React with hooks and functional components
-- ✅ TypeScript for type safety
-- ✅ Responsive design with CSS Grid
-- ✅ Form validation and error handling
-- ✅ Real-time expense management (add, edit, delete)
-- ✅ Advanced filtering system (amount, category, date, tags)
-- ✅ Comprehensive tagging system with custom colors
-- ✅ Analytics dashboard with interactive charts
-- ✅ CSV export functionality
-- ✅ **Three-tab navigation** (Expenses/Budgets/Analytics)
-- ✅ Multi-currency support with real-time conversion
-- ✅ Flexible sorting system (date, amount, title, category)
-- ✅ Currency settings configuration
 
 ## Project Structure
 
